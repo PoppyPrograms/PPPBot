@@ -6,11 +6,14 @@ on:
       - main
   workflow_dispatch:
 
+concurrency:
+  group: production
+  cancel-in-progress: true
+
 jobs:
   deployment:
     runs-on: self-hosted
     environment: production
-    concurrency: production
     steps:
       - uses: actions/checkout@v4
       
