@@ -1,6 +1,7 @@
 import discord, glob, env
 from discord.ext import commands
 from discord import app_commands
+import helpers
 
 modules = []
 for m in glob.glob("commands/*.py"):
