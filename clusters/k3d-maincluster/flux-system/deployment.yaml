@@ -23,6 +23,11 @@ spec:
       - name: pppbot-container
         image: ghcr.io/poppyprograms/pppbot:main
         env:
+        - name: WEBHOOK_URL
+          valueFrom:
+            secretKeyRef:
+              name: pppsecrets
+              key: WEBHOOK_URL
         - name: DISCORD_TOKEN
           valueFrom:
             secretKeyRef:
