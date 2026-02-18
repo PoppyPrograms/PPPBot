@@ -21,7 +21,7 @@ spec:
       - name: ghcr-secret
       containers:
       - name: pppbot-container
-        image: ghcr.io/poppyprograms/pppbot:main
+        image: ghcr.io/poppyprograms/pppbot:fluxcd-1771447128
         imagePullPolicy: Always
         env:
         - name: WEBHOOK_URL
