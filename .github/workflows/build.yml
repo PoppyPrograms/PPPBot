@@ -32,6 +32,6 @@ jobs:
         with:
           context: .
           push: true
-          tags: ghcr.io/${{ steps.vars.outputs.repo }}:${{ steps.vars.outputs.branch }}
+          tags: ghcr.io/${{ steps.vars.outputs.repo }}:${{ steps.vars.outputs.branch }},ghcr.io/${{ steps.vars.outputs.repo }}:${{ steps.vars.outputs.branch }}-${{ github.sha }}
           build-args: |
               BOT_VERSION=${{ github.sha }}
