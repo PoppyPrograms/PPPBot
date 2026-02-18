@@ -41,7 +41,7 @@ jobs:
           push: true
           tags: ghcr.io/${{ steps.vars.outputs.repo }}:${{ steps.vars.outputs.branch }},ghcr.io/${{ steps.vars.outputs.repo }}:${{ steps.vars.outputs.branch }}-${{ steps.vars.outputs.timestamp }}
           build-args: |
-            BOT_VERSION=${{ github.sha }}
+            BOT_VERSION=${{ steps.vars.outputs.timestamp }}
 
       - name: Update the manifest
         run: |
