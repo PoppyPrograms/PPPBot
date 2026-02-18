@@ -9,7 +9,13 @@ metadata:
   name: pppbot
   namespace: ppp 
 spec:
+  selector:
+    matchLabels:
+      app: pppbot
   template:
+    metadata:
+      labels:
+        app: pppbot
     spec:
       containers:
       - name: pppbot-container
