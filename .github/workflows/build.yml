@@ -36,7 +36,7 @@ jobs:
       
       - name: Update the manifest
         run: |
-          sed -i 's|image: ghcr.io/.*|image: ghcr.io/${{ steps.vars.outputs.repo }}:${{ steps.vars.outputs.branch }}-${{ steps.vars.outputs.timestamp }}|' > ./clusters/k3d-maincluster/flux-system/deployment.yaml 
+          sed -i 's|image: ghcr.io/.*|image: ghcr.io/${{ steps.vars.outputs.repo }}:${{ steps.vars.outputs.branch }}-${{ steps.vars.outputs.timestamp }}|' ./clusters/k3d-maincluster/flux-system/deployment.yaml 
           git config --global user.name "GitHub Actions Bot"
           git config --global user.email "actions@github.com"
           git commit -am "ci: bump version [skip ci]"
