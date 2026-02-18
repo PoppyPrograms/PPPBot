@@ -33,14 +33,6 @@ jobs:
 
           TIMESTAMP=$(date +%s)
           echo "timestamp=$TIMESTAMP" >> $GITHUB_OUTPUT
-      
-      - name: Update the manifest
-        run: |
-          sed -i 's|image: ghcr.io/.*|image: ghcr.io/${{ steps.vars.outputs.repo }}:${{ steps.vars.outputs.branch }}-${{ steps.vars.outputs.timestamp }}|' ./clusters/k3d-maincluster/flux-system/deployment.yaml 
-          git config --global user.name "GitHub Actions Bot"
-          git config --global user.email "actions@github.com"
-          git commit -am "ci: bump version [skip ci]"
-          git push
 
       - name: Build and push
         uses: docker/build-push-action@v5
@@ -49,4 +41,12 @@ jobs:
           push: true
           tags: ghcr.io/${{ steps.vars.outputs.repo }}:${{ steps.vars.outputs.branch }},ghcr.io/${{ steps.vars.outputs.repo }}:${{ steps.vars.outputs.branch }}-${{ steps.vars.outputs.timestamp }}
           build-args: |
-              BOT_VERSION=${{ github.sha }}
+            BOT_VERSION=${{ github.sha }}
+
+      - name: Update the manifest
+        run: |
+          sed -i 's|image: ghcr.io/.*|image: ghcr.io/${{ steps.vars.outputs.repo }}:${{ steps.vars.outputs.branch }}-${{ steps.vars.outputs.timestamp }}|' ./clusters/k3d-maincluster/flux-system/deployment.yaml
+          git config --global user.name "GitHub Actions Bot"
+          git config --global user.email "actions@github.com"
+          git commit -am "ci: bump version [skip ci]"
+          git push
