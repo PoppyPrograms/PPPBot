@@ -1,4 +1,6 @@
-import discord, glob, env
+import discord
+import glob
+import env
 from discord.ext import commands
 from discord import app_commands
 
