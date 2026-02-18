@@ -5,8 +5,8 @@ import discord
 
 # TODO use actual jail whenever lemon DB comes out and refactor this piece of trash
 
-kenny_id = 1276528572898611271
-hell_channel_id = 1473803213672288337
+kenny_id = 1389973978356908032
+hell_channel_id = 1397848116291440755
 kenny = None
 hell_channel = None
 
