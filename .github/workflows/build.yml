@@ -21,14 +21,29 @@ jobs:
       #  run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
       #  id: get_branch
 
-      - name: Extract branch name and lowercase repo
-        shell: bash
-        run: |
-          # Get branch name
-          echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
-          # Convert Repo Name to lowercase
-          echo "repo=${GITHUB_REPOSITORY@L}" >> $GITHUB_OUTPUT
+      #- name: Extract branch name and lowercase repo
+      #  shell: bash
+      #  run: |
+      #    # Get branch name
+      #    echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
+      #    # Convert Repo Name to lowercase
+      #    echo "repo=${GITHUB_REPOSITORY@L}" >> $GITHUB_OUTPUT
+      #  id: vars
+
+      - name: Extract branch and lowercase repo
         id: vars
+        run: |
+          BRANCH=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}
+          echo "branch=$BRANCH" >> $GITHUB_OUTPUT
+
+          REPO=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          echo "repo=$REPO" >> $GITHUB_OUTPUT
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ghcr.io/${{ steps.vars.outputs.repo }}:${{ steps.vars.outputs.branch }}
 
       #- name: Build and push
       #  uses: docker/build-push-action@v5
@@ -37,9 +52,9 @@ jobs:
       #    push: true
       #    tags: ghcr.io/${{ github.repository }}:${{ steps.get_branch.outputs.branch }} 
 
-      - name: Build and push
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          push: true
-          tags: ghcr.io/${{ steps.vars.outputs.repo }}:${{ steps.vars.outputs.branch }}
+      #- name: Build and push
+      #  uses: docker/build-push-action@v5
+      #  with:
+      #    context: .
+      #    push: true
+      #    tags: ghcr.io/${{ steps.vars.outputs.repo }}:${{ steps.vars.outputs.branch }}
