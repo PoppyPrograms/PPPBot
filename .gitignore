@@ -2,6 +2,6 @@
 Scripts/
 Lib/
 Include/
-.github/ 
+# .github/ Who the fuck put that ? 
 pyvenv.cfg
 __pycache__/
