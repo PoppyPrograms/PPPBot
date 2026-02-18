@@ -6,6 +6,9 @@ on:
 jobs:
   deployment:
     runs-on: self-hosted
+    permissions:
+      contents: read
+      packages: write
     steps:
       - uses: actions/checkout@v4
 
@@ -15,20 +18,6 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-
-      #- name: Extract branch name
-      #  shell: bash
-      #  run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
-      #  id: get_branch
-
-      #- name: Extract branch name and lowercase repo
-      #  shell: bash
-      #  run: |
-      #    # Get branch name
-      #    echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
-      #    # Convert Repo Name to lowercase
-      #    echo "repo=${GITHUB_REPOSITORY@L}" >> $GITHUB_OUTPUT
-      #  id: vars
 
       - name: Extract branch and lowercase repo
         id: vars
@@ -44,17 +33,3 @@ jobs:
           context: .
           push: true
           tags: ghcr.io/${{ steps.vars.outputs.repo }}:${{ steps.vars.outputs.branch }}
-
-      #- name: Build and push
-      #  uses: docker/build-push-action@v5
-      #  with:
-      #    context: .
-      #    push: true
-      #    tags: ghcr.io/${{ github.repository }}:${{ steps.get_branch.outputs.branch }} 
-
-      #- name: Build and push
-      #  uses: docker/build-push-action@v5
-      #  with:
-      #    context: .
-      #    push: true
-      #    tags: ghcr.io/${{ steps.vars.outputs.repo }}:${{ steps.vars.outputs.branch }}
