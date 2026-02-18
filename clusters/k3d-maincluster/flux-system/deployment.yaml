@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pppbot
+spec:
+  template:
+    spec:
+      containers:
+      - name: pppbot-container
+        image: ghcr.io/poppyprograms/pppbot:fluxcd
+        env:
+        - name: DISCORD_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: pppsecrets
+              key: DISCORD_TOKEN
+	- name: GUILD_ID
+	  valueFrom:
+	    secretKeyRef:
+	      name: pppsecrets
+	      key: GUILD_ID
