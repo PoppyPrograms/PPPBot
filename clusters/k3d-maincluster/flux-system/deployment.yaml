@@ -22,6 +22,7 @@ spec:
       containers:
       - name: pppbot-container
         image: ghcr.io/poppyprograms/pppbot:main
+        imagePullPolicy: Always
         env:
         - name: WEBHOOK_URL
           valueFrom:
