@@ -17,6 +17,8 @@ spec:
       labels:
         app: pppbot
     spec:
+      imagePullSecrets:
+      - name: ghcr-secret
       containers:
       - name: pppbot-container
         image: ghcr.io/poppyprograms/pppbot:fluxcd
