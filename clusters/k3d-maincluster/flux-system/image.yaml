@@ -22,27 +22,3 @@ spec:
   policy:
     alphabetical:
       order: asc
----
-apiVersion: image.toolkit.fluxcd.io/v1beta1
-kind: ImageUpdateAutomation
-metadata:
-  name: flux-system
-  namespace: flux-system
-spec:
-  interval: 1m0s
-  sourceRef:
-    kind: GitRepository
-    name: flux-system
-  git:
-    checkout:
-      ref:
-        branch: main
-    commit:
-      author:
-        email: fluxcdbot@users.noreply.github.com
-        name: fluxcdbot
-    push:
-      branch: flux/image-update  # pushes to this branch instead of main
-  update:
-    path: ./clusters/k3d-maincluster
-    strategy: Setters
