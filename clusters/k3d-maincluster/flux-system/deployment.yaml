@@ -14,8 +14,8 @@ spec:
             secretKeyRef:
               name: pppsecrets
               key: DISCORD_TOKEN
-	- name: GUILD_ID
-	  valueFrom:
-	    secretKeyRef:
-	      name: pppsecrets
-	      key: GUILD_ID
+        - name: GUILD_ID
+          valueFrom:
+            secretKeyRef:
+            name: pppsecrets
+            key: GUILD_ID
