@@ -16,14 +16,30 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract branch name
+      #- name: Extract branch name
+      #  shell: bash
+      #  run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
+      #  id: get_branch
+
+      - name: Extract branch name and lowercase repo
         shell: bash
-        run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
-        id: get_branch
+        run: |
+          # Get branch name
+          echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
+          # Convert Repo Name to lowercase
+          echo "repo=${GITHUB_REPOSITORY@L}" >> $GITHUB_OUTPUT
+        id: vars
+
+      #- name: Build and push
+      #  uses: docker/build-push-action@v5
+      #  with:
+      #    context: .
+      #    push: true
+      #    tags: ghcr.io/${{ github.repository }}:${{ steps.get_branch.outputs.branch }} 
 
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
-          tags: ghcr.io/${{ github.repository }}:${{ steps.get_branch.outputs.branch }} 
+          tags: ghcr.io/${{ steps.vars.outputs.repo }}:${{ steps.vars.outputs.branch }}
