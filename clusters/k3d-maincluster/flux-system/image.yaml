@@ -42,7 +42,7 @@ spec:
         email: fluxcdbot@users.noreply.github.com
         name: fluxcdbot
     push:
-      branch: main
+      branch: flux/image-update  # pushes to this branch instead of main
   update:
     path: ./clusters/k3d-maincluster
     strategy: Setters

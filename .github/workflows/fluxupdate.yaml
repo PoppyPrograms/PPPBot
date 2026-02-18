@@ -1,0 +1,15 @@
+name: Flux Image Update PR
+on:
+  push:
+    branches:
+      - flux/image-update
+
+jobs:
+  create-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create PR
+        run: gh pr create --title "chore: update image tag" --body "Automated image update by Flux" --base main --head flux/image-update
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
