@@ -10,6 +10,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Create PR
-        run: gh pr create --title "chore: update image tag" --body "Automated image update by Flux" --base main --head flux/image-update
+        run: 'gh pr create --title "chore: update image tag" --body "Automated image update by Flux" --base main --head flux/image-update'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
