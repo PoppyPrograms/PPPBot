@@ -27,11 +27,14 @@ jobs:
 
           REPO=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
           echo "repo=$REPO" >> $GITHUB_OUTPUT
+
+          TIMESTAMP=$(date +%s)
+          echo "timestamp=$TIMESTAMP" >> $GITHUB_OUTPUT
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
-          tags: ghcr.io/${{ steps.vars.outputs.repo }}:${{ steps.vars.outputs.branch }},ghcr.io/${{ steps.vars.outputs.repo }}:${{ steps.vars.outputs.branch }}-${{ github.sha }}
+          tags: ghcr.io/${{ steps.vars.outputs.repo }}:${{ steps.vars.outputs.branch }},ghcr.io/${{ steps.vars.outputs.repo }}:${{ steps.vars.outputs.branch }}-${{ steps.vars.output.timestamp }}
           build-args: |
               BOT_VERSION=${{ github.sha }}
