@@ -29,7 +29,7 @@ async def on_ready():
 async def on_message(message):
 	for handler in on_message_handlers:
 		r = await handler(message)
-		if (r == True): # return True to signal message capture
+		if r == True: # return True to signal message capture
 			return
 
 def load_module_descriptor(module, descriptor):
@@ -47,6 +47,7 @@ def load_module_descriptor(module, descriptor):
 			callback = descriptor["callback"]
 			description = descriptor["description"] if ("description" in descriptor) else "..."
 			nsfw = bool(descriptor["nsfw"]) if ("nsfw" in descriptor) else False
+			print("registerd /%s" % name)
 			client.tree.add_command(app_commands.Command(name=name, description=description, callback=callback, nsfw=nsfw))
 			return
 
@@ -57,6 +58,7 @@ def load_module_descriptor(module, descriptor):
 			name = descriptor["name"]
 			callback = descriptor["callback"]
 			nsfw = bool(descriptor["nsfw"]) if ("nsfw" in descriptor) else False
+			print("registerd /%s" % name)
 			client.tree.add_command(app_commands.ContextMenu(name=name, callback=callback, nsfw=nsfw))
 			return
 
