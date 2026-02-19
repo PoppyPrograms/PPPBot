@@ -1,6 +1,6 @@
 import os
 
-CDS_SERVER_HOST = "127.0.0.1"
+CDS_SERVER_HOST = "10.0.0.88"
 CDS_SERVER_HOSTNAME = "qcds.totocodes.fr"
 CDS_SERVER_PORT = 7345
 CDS_CERT_PATH = "ssl/cert.pem"
