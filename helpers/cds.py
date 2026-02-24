@@ -11,6 +11,31 @@ def __generate_packet_header(type: int, message: bytes, direction: int) -> bytes
 	l = len(message)
 	return env.CDS_TOKEN + bytes([type, l & 0xff, (l >> 8) & 0xff, direction]) + message
 
+def __generate_content_header(content: bytes) -> bytes:
+	l = len(content)
+	return bytes([l & 0xff, (l >> 8) & 0xff, (l >> 16) & 0xff, (l >> 24) & 0xff, (l >> 32) & 0xff, (l >> 40) & 0xff, (l >> 48) & 0xff, (l >> 56) & 0xff]) + content
+
+def __decode_server_header(header: bytes) -> bytes:
+	l = header[1] | (header[2] << 8) | (header[3] << 16) | (header[4] << 24) | (header[5] << 32) | (header[6] << 40) | (header[7] << 48)
+	return l
+
+def full_packet_received(b: bytes):
+	if (len(b) < 8):
+		return False
+	return len(b) == (8 + __decode_server_header(b))
+
+def __cds_recv_all(packet: bytes, sock):
+	n = packet
+	while True:
+		try:
+			p = sock.recv(16384)
+			if not p:
+				return n
+		except:
+			return n # done
+		n = n + p
+	return n
+
 def __send_to_cds_server(packet: bytes) -> bytes:
 	try:
 		ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
@@ -20,18 +45,30 @@ def __send_to_cds_server(packet: bytes) -> bytes:
 		sock.connect((env.CDS_SERVER_HOST, env.CDS_SERVER_PORT))
 		sock.settimeout(2)
 		sock.sendall(packet)
-		r = sock.recv(4096)
-		sock.shutdown(socket.SHUT_RDWR)
-		sock.close()
+
+		r = b""
+		retries = 3
+		while (not full_packet_received(r)) and retries > 0:
+			r = __cds_recv_all(r, sock)
+			retries = retries - 1
+
+		if (not full_packet_received(r)) or retries <= 0:
+			raise Exception("recv error")
+
+		try:
+			sock.shutdown(socket.SHUT_RDWR)
+			sock.close()
+		except:
+			pass
 		return r
-	except Exception as e:
-		return bytes([0xfe, 0x04, 0x00, 0x00]) + b"ERR\x00" # whatever
+	except:
+		return bytes([0xfe, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]) + b"ERR\x00" # whatever
 
 def storage_upload(filename: str, content: bytes) -> bool:
 	hash = __generate_hash(os.path.basename(filename))
-	packet = __generate_packet_header(0x00, hash, 0x01) + content
+	packet = __generate_packet_header(0x00, hash, 0x01) + __generate_content_header(content)
 	response = __send_to_cds_server(packet)
-	if len(response) < 4:
+	if len(response) < 8:
 		return False
 	if response[0] != 0xff:
 		return False
@@ -41,10 +78,8 @@ def storage_download(filename: str) -> bytes | bool:
 	hash = __generate_hash(os.path.basename(filename))
 	packet = __generate_packet_header(0x00, hash, 0x00)
 	response = __send_to_cds_server(packet)
-	if len(response) < 4:
+	if len(response) < 8:
 		return False
 	if response[0] != 0xff:
 		return False
-	if response[3] != 0x01:
-		return False
-	return response[4:]
+	return response[8:]
