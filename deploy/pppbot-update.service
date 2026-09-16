@@ -7,5 +7,5 @@ Wants=network-online.target
 [Service]
 Type=oneshot
 WorkingDirectory=/opt/pppbot
-ExecStart=/usr/bin/docker-compose --file /opt/pppbot/compose.yaml pull
-ExecStart=/usr/bin/docker-compose --file /opt/pppbot/compose.yaml up --detach --remove-orphans
+ExecStart=/usr/bin/docker compose --file /opt/pppbot/compose.yaml pull
+ExecStart=/usr/bin/docker compose --file /opt/pppbot/compose.yaml up --detach --remove-orphans
