@@ -7,6 +7,5 @@ pyvenv.cfg
 __pycache__/
 # we now have the committed code to load from secrets so this allows easy local override
 env.py
-
-# Local instructions for coding agents
 AGENTS.md
+burga.csv
