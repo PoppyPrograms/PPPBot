@@ -2,10 +2,12 @@
 Scripts/
 Lib/
 Include/
-# .github/ Who the fuck put that ? 
+# .github/ Who the fuck put that ?
 pyvenv.cfg
 __pycache__/
 # we now have the committed code to load from secrets so this allows easy local override
 env.py
 AGENTS.md
 burga.csv
+.env
+graphify-out/

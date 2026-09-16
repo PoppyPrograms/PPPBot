@@ -20,9 +20,18 @@ error_reporter.install()
 
 import discord
 import env
+from pathlib import Path
 from discord import app_commands
 from discord.ext import commands
 
+
+Path("burga.csv").touch(exist_ok=True)
+
+modules = []
+on_message_handlers = []
+for m in glob.glob("commands/*.py"):
+	module = __import__(m[:-3].replace("/","."), globals(), locals(), [], 0)
+	modules.append(getattr(module, m[9:-3]))
 
 logger = logging.getLogger("pppbot")
 
