@@ -6,6 +6,7 @@ async def webhook_command(interaction: discord.Interaction, content: str, userna
 		await helpers.send_webhook_message(content, username=username, avatar_url=avatar_url)
 		await interaction.response.send_message("Sucess!", ephemeral=True)
 	except Exception as e:
+		helpers.report_exception(e, context="/webhook_test command")
 		print(e)
 		await interaction.response.send_message("An unknown error occured.", ephemeral=True)
 
