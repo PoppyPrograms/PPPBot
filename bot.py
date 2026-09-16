@@ -1,8 +1,11 @@
 import discord
 import glob
 import env
+from pathlib import Path
 from discord.ext import commands
 from discord import app_commands
+
+Path("burga.csv").touch(exist_ok=True)
 
 modules = []
 on_message_handlers = []
