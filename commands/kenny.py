@@ -53,7 +53,7 @@ async def kenny_command(interaction: discord.Interaction):
             "i coudnt send them a message <:WHYYYY:1171546567614926949>"
         )
 
-	await interaction.response.send_message(f"get carpet-puked LOSER <:murder:1364170297439162388>")
+    await interaction.response.send_message(f"get carpet-puked LOSER <:murder:1364170297439162388>")
 
 
 module = {

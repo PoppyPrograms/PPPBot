@@ -855,7 +855,8 @@ async def sdm_command(interaction: discord.Interaction, instruction: str):
 			return
 		file = helpers.text_to_file(description, filename="sdm-entry.txt")
 		await interaction.response.send_message(file=file, ephemeral=True)
-	except:
+	except Exception as exception:
+		helpers.report_exception(exception, context="/sdm command")
 		await interaction.response.send_message("An unknown error occured.", ephemeral=True)
 
 module = {
