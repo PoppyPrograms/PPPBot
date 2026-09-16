@@ -1,0 +1,7 @@
+services:
+  bot:
+    image: ghcr.io/poppyprograms/pppbot:main
+    container_name: pppbot
+    restart: unless-stopped
+    env_file:
+      - /etc/pppbot/pppbot.env

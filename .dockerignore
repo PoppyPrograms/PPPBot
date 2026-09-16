@@ -1,0 +1,9 @@
+.git
+.github
+.gitignore
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+compose.yaml
+deploy/

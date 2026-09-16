@@ -1,0 +1,10 @@
+[Unit]
+Description=Pull and restart PPPBot when its image changes
+Requires=docker.service
+After=docker.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/docker compose --project-directory /opt/pppbot --file /opt/pppbot/compose.yaml pull
+ExecStart=/usr/bin/docker compose --project-directory /opt/pppbot --file /opt/pppbot/compose.yaml up --detach --remove-orphans

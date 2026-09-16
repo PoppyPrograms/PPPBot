@@ -1,0 +1,11 @@
+[Unit]
+Description=Check for PPPBot container updates
+
+[Timer]
+OnBootSec=1min
+OnUnitActiveSec=5min
+RandomizedDelaySec=30s
+Persistent=true
+
+[Install]
+WantedBy=timers.target
