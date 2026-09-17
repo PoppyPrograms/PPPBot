@@ -1,15 +1,15 @@
 import discord
 
+from storage import read_balances
+
+
 async def burgaleaderborad(interaction: discord.Interaction):
     burgas = []
     client = interaction.client
-    with open("burga.csv") as file:
-        for line in file.readlines():
-            split = line.split(",")
-            user = await client.fetch_user(split[0])
-            print(user)
-            nickname = user.display_name
-            burgas.append([int(split[1]), nickname])
+    for user_id, amount in read_balances().items():
+        user = await client.fetch_user(int(user_id))
+        nickname = user.display_name
+        burgas.append([amount, nickname])
     burgas.sort()
 
     description = "\n".join([f"{burga[1]}: {burga[0]} burgas" for burga in burgas[::-1]])

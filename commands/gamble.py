@@ -1,32 +1,49 @@
-from pathlib import Path
 from random import choice
 
 import discord
 
-
-BURGA_FILE = Path("burga.csv")
+from storage import (
+    play_gamble,
+    read_balances as read_balances_from_storage,
+    read_gamble_stats as read_gamble_stats_from_storage,
+    reserve_wager as reserve_wager_in_storage,
+    settle_wager as settle_wager_in_storage,
+    write_balances as write_balances_to_storage,
+    write_gamble_stats as write_gamble_stats_to_storage,
+)
 
 
 def read_balances():
-    BURGA_FILE.touch(exist_ok=True)
-    balances = {}
-
-    with BURGA_FILE.open(encoding="utf-8") as file:
-        for line in file:
-            line = line.strip()
-            if not line:
-                continue
-            user_id, count = line.split(",", 1)
-            balances[user_id] = int(count)
-
-    return balances
+    return read_balances_from_storage()
 
 
 def write_balances(balances):
-    contents = "\n".join(
-        f"{user_id},{count}" for user_id, count in balances.items()
-    )
-    BURGA_FILE.write_text(contents, encoding="utf-8")
+    write_balances_to_storage(balances)
+
+
+def read_gamble_stats():
+    return read_gamble_stats_from_storage()
+
+
+def write_gamble_stats(stats):
+    write_gamble_stats_to_storage(stats)
+
+
+def record_gamble_result(stats, user_id, amount, won):
+    gains, losses = stats.get(user_id, (0, 0))
+    if won:
+        gains += amount
+    else:
+        losses += amount
+    stats[user_id] = (gains, losses)
+
+
+def reserve_wager(user_id, amount):
+    return reserve_wager_in_storage(user_id, amount)
+
+
+def settle_wager(user_id, amount, outcome):
+    return settle_wager_in_storage(user_id, amount, outcome)
 
 
 async def gamble(interaction: discord.Interaction, amount: int):
@@ -37,20 +54,14 @@ async def gamble(interaction: discord.Interaction, amount: int):
         return
 
     user_id = str(interaction.user.id)
-    balances = read_balances()
-    balance = balances.get(user_id, 0)
-
-    if amount > balance:
+    won = choice((True, False))
+    played, new_balance = play_gamble(user_id, amount, won)
+    if not played:
         await interaction.response.send_message(
-            f"You only have {balance} burgas, so you cannot gamble {amount} <:rage:1348642100916387891>",
+            f"You only have {new_balance} burgas, so you cannot gamble {amount} <:rage:1348642100916387891>",
             ephemeral=True,
         )
         return
-
-    won = choice((True, False))
-    new_balance = balance + amount if won else balance - amount
-    balances[user_id] = new_balance
-    write_balances(balances)
 
     if won:
         result = f"You won {amount} burgas <:tony:1450129761916551188>"
