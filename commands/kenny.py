@@ -5,7 +5,7 @@ import discord
 
 # TODO use actual jail whenever lemon DB comes out and refactor this piece of trash
 
-kenny_id = 1389973978356908032
+kenny_id = 1543791044825714790
 hell_channel_id = 1397848116291440755
 kenny = None
 hell_channel = None
@@ -52,6 +52,8 @@ async def kenny_command(interaction: discord.Interaction):
         await interaction.response.send_message(
             "i coudnt send them a message <:WHYYYY:1171546567614926949>"
         )
+
+    await interaction.response.send_message(f"get carpet-puked LOSER <:murder:1364170297439162388>")
 
 
 module = {
