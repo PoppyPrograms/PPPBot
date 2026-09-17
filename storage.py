@@ -1,12 +1,11 @@
 from contextlib import contextmanager
 from datetime import datetime, timezone
 import json
-import os
 from pathlib import Path
 import sqlite3
 
 
-DATA_DIRECTORY = Path(os.getenv("PPPBOT_DATA_DIR", "."))
+DATA_DIRECTORY = Path(__file__).resolve().parent
 DATA_DIRECTORY.mkdir(parents=True, exist_ok=True)
 DATABASE_FILE = DATA_DIRECTORY / "pppbot.sqlite3"
 LEGACY_BALANCE_FILE = DATA_DIRECTORY / "burga.csv"

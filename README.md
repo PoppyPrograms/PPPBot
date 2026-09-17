@@ -25,6 +25,6 @@ What does PPP Bot do?? Good question! I dont know yet 😛
   `/cancel_listing` to trade collectibles.
 
 Balances, gamble statistics, collectibles, listings, bids, and transactions are
-stored in SQLite. Docker Compose keeps that database in the `pppbot-data`
-volume. Enable Discord's **Message Content Intent** for the bot in the
-Developer Portal so claimed messages can be snapshotted.
+stored in `pppbot.sqlite3` at the project root. Enable Discord's **Message
+Content Intent** for the bot in the Developer Portal so claimed messages can
+be snapshotted.
