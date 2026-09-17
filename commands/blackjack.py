@@ -1,12 +1,9 @@
-from random import shuffle
-
 import discord
 
+from commands.cards import CARD_BACK, RANKS, SUITS, card_text, hand_text, new_deck
 from commands.gamble import reserve_wager, settle_wager
 
 
-RANKS = ("A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K")
-SUITS = ("♠", "♥", "♦", "♣")
 CARD_VALUES = {
     "A": 11,
     "2": 2,
@@ -24,16 +21,6 @@ CARD_VALUES = {
 }
 
 
-def new_deck():
-    deck = [(rank, suit) for suit in SUITS for rank in RANKS]
-    shuffle(deck)
-    return deck
-
-
-def card_text(card):
-    return f"{card[0]}{card[1]}"
-
-
 def hand_value(hand):
     value = sum(CARD_VALUES[rank] for rank, _ in hand)
     aces = sum(rank == "A" for rank, _ in hand)
@@ -41,10 +28,6 @@ def hand_value(hand):
         value -= 10
         aces -= 1
     return value
-
-
-def hand_text(hand):
-    return " ".join(card_text(card) for card in hand)
 
 
 class BlackjackView(discord.ui.View):
@@ -70,7 +53,7 @@ class BlackjackView(discord.ui.View):
         dealer_cards = (
             hand_text(self.dealer_hand)
             if reveal_dealer
-            else f"{card_text(self.dealer_hand[0])} 🂠"
+            else f"{card_text(self.dealer_hand[0])} {CARD_BACK}"
         )
         dealer_total = (
             hand_value(self.dealer_hand) if reveal_dealer else "?"

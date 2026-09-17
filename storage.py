@@ -47,6 +47,12 @@ CREATE TABLE IF NOT EXISTS balances (
     amount INTEGER NOT NULL DEFAULT 0 CHECK (amount >= 0)
 );
 
+CREATE TABLE IF NOT EXISTS burga_steals (
+    thief_id TEXT PRIMARY KEY,
+    victim_id TEXT NOT NULL,
+    stolen_on TEXT NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS gamble_stats (
     user_id TEXT PRIMARY KEY,
     gains INTEGER NOT NULL DEFAULT 0 CHECK (gains >= 0),
@@ -277,6 +283,58 @@ def adjust_balance(user_id, amount):
         new_balance = _get_balance(connection, user_id) + amount
         _set_balance(connection, user_id, new_balance)
         return new_balance
+
+
+def steal_burga(thief_id, victim_id, day=None):
+    """Transfer one available burga and enforce one successful steal per day."""
+
+    thief_id = str(thief_id)
+    victim_id = str(victim_id)
+    if thief_id == victim_id:
+        return {"stolen": False, "reason": "self_target"}
+
+    day = day or datetime.now(timezone.utc).date().isoformat()
+    with database() as connection:
+        _begin_write(connection)
+        previous_steal = connection.execute(
+            "SELECT stolen_on FROM burga_steals WHERE thief_id = ?",
+            (thief_id,),
+        ).fetchone()
+        if previous_steal is not None and previous_steal["stolen_on"] == day:
+            return {
+                "stolen": False,
+                "reason": "daily_limit",
+                "thief_balance": _get_balance(connection, thief_id),
+            }
+
+        victim_balance = _get_balance(connection, victim_id)
+        if _available_balance(connection, victim_id) < 1:
+            return {
+                "stolen": False,
+                "reason": "victim_empty",
+                "thief_balance": _get_balance(connection, thief_id),
+                "victim_balance": victim_balance,
+            }
+
+        thief_balance = _get_balance(connection, thief_id) + 1
+        victim_balance -= 1
+        _set_balance(connection, victim_id, victim_balance)
+        _set_balance(connection, thief_id, thief_balance)
+        connection.execute(
+            """
+            INSERT INTO burga_steals (thief_id, victim_id, stolen_on)
+            VALUES (?, ?, ?)
+            ON CONFLICT(thief_id) DO UPDATE SET
+                victim_id = excluded.victim_id,
+                stolen_on = excluded.stolen_on
+            """,
+            (thief_id, victim_id, day),
+        )
+        return {
+            "stolen": True,
+            "thief_balance": thief_balance,
+            "victim_balance": victim_balance,
+        }
 
 
 def reserve_wager(user_id, amount):
