@@ -52,6 +52,7 @@ class BlackjackView(discord.ui.View):
         super().__init__(timeout=90)
         self.player_id = player_id
         self.wager = wager
+        self.wager_message = wager if wager > 0 else "ZERO" # Lol!
         self.deck = new_deck()
         self.player_hand = [self.deck.pop(), self.deck.pop()]
         self.dealer_hand = [self.deck.pop(), self.deck.pop()]
@@ -76,7 +77,7 @@ class BlackjackView(discord.ui.View):
             hand_value(self.dealer_hand) if reveal_dealer else "?"
         )
         return (
-            f"**Blackjack** — wager: {self.wager} burgas\n"
+            f"**Blackjack** — wager: {self.wager_message} burgas\n"
             f"Dealer: {dealer_cards} (`{dealer_total}`)\n"
             f"You: {hand_text(self.player_hand)} (`{hand_value(self.player_hand)}`)\n\n"
             f"{status}"
@@ -94,7 +95,7 @@ class BlackjackView(discord.ui.View):
         self.stop()
         self.disable_buttons()
         new_balance = settle_wager(self.player_id, self.wager, outcome)
-        status = f"{status} Your balance is now {new_balance} burgas <:burga:1493907112542077092>"
+        status = f"{status} Your balance is {"now" if self.wager > 0 else "still"} {new_balance} burgas <:burga:1493907112542077092>"
         await interaction.response.edit_message(
             content=self.content(status, reveal_dealer=True), view=self
         )
@@ -106,9 +107,9 @@ class BlackjackView(discord.ui.View):
         player_total = hand_value(self.player_hand)
         dealer_total = hand_value(self.dealer_hand)
         if dealer_total > 21 or player_total > dealer_total:
-            await self.finish(interaction, "win", f"You win {self.wager} burgas <:bkdrool:1301252732023476374>")
+            await self.finish(interaction, "win", f"You win {self.wager_message} burgas <:bkdrool:1301252732023476374>")
         elif player_total < dealer_total:
-            await self.finish(interaction, "loss", f"You lose {self.wager} burgas <:realhipster:1464647196891680879>")
+            await self.finish(interaction, "loss", f"You lose {self.wager_message} burgas <:realhipster:1464647196891680879>")
         else:
             await self.finish(interaction, "draw", "Push — your wager is refunded <:apdog:1355120388488560720>")
 
@@ -120,7 +121,7 @@ class BlackjackView(discord.ui.View):
             await self.finish(
                 interaction,
                 "loss",
-                f"Bust! You lose {self.wager} burgas <:WHYYYY:1171546567614926949>",
+                f"Bust! You lose {self.wager_message} burgas <:WHYYYY:1171546567614926949>",
             )
         elif player_total == 21:
             await self.resolve(interaction)
@@ -146,7 +147,7 @@ class BlackjackView(discord.ui.View):
                 await self.message.edit(
                     content=self.content(
                         f"Time's up — your wager was refunded <:amongus:1533984742339514628>"
-                        f"Your balance is now {new_balance} burgas.",
+                        f"Your balance is {"now" if self.wager > 0 else "still"} {new_balance} burgas.",
                         reveal_dealer=True,
                     ),
                     view=self,
@@ -155,13 +156,7 @@ class BlackjackView(discord.ui.View):
                 pass
 
 
-async def blackjack(interaction: discord.Interaction, amount: int):
-    if amount <= 0:
-        await interaction.response.send_message(
-            "The wager must be greater than zero <:tony:1450129761916551188>", ephemeral=True
-        )
-        return
-
+async def blackjack(interaction: discord.Interaction, amount: int = 0):
     user_id = str(interaction.user.id)
     reserved, balance = reserve_wager(user_id, amount)
     if not reserved:
