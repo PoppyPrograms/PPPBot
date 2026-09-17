@@ -154,15 +154,12 @@ client.tree.on_error = on_app_command_error
 @client.event
 async def on_ready():
 	global auction_watcher_task
-	client.tree.clear_commands(guild=None)
 	client.tree.clear_commands(guild=guild)
 	on_message_handlers.clear()
 
 	for module in modules:
 		load_module(module)
 
-	await client.tree.sync()
-	client.tree.copy_global_to(guild=guild)
 	await client.tree.sync(guild=guild)
 
 	if auction_watcher_task is None or auction_watcher_task.done():
@@ -198,7 +195,8 @@ def load_module_descriptor(module, descriptor):
 					description=description,
 					callback=callback,
 					nsfw=nsfw,
-				)
+				),
+				guild=guild
 			)
 			return
 
@@ -209,9 +207,14 @@ def load_module_descriptor(module, descriptor):
 			name = descriptor["name"]
 			callback = descriptor["callback"]
 			nsfw = bool(descriptor["nsfw"]) if "nsfw" in descriptor else False
-			print("registerd /%s" % name)
+			print("registered /%s" % name)
 			client.tree.add_command(
-				app_commands.ContextMenu(name=name, callback=callback, nsfw=nsfw)
+				app_commands.ContextMenu(
+					name=name,
+					callback=callback,
+					nsfw=nsfw,
+				),
+				guild=guild
 			)
 			return
 
