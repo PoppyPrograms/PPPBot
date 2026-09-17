@@ -3,5 +3,12 @@ services:
     image: ghcr.io/poppyprograms/pppbot:main
     container_name: pppbot
     restart: unless-stopped
+    environment:
+      PPPBOT_DATA_DIR: /data
     env_file:
       - /etc/pppbot/pppbot.env
+    volumes:
+      - pppbot-data:/data
+
+volumes:
+  pppbot-data:

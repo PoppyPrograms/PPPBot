@@ -1,32 +1,76 @@
+import asyncio
 import discord
 import glob
 import env
-from pathlib import Path
 from discord.ext import commands
 from discord import app_commands
 
-Path("burga.csv").touch(exist_ok=True)
+from storage import close_expired_auctions, initialize_database
+
+
+initialize_database()
 
 modules = []
 on_message_handlers = []
 for m in glob.glob("commands/*.py"):
-	module = __import__(m[:-3].replace("/","."), globals(), locals(), [], 0)
-	modules.append(getattr(module, m[9:-3]))
+	module = __import__(m[:-3].replace("/","."), globals(), locals(), ["*"], 0)
+	modules.append(module)
 
 guild=discord.Object(id=env.GUILD_ID)
 intents = discord.Intents.all()
+intents.message_content = True
 client = commands.Bot(command_prefix="&", intents=intents)
+auction_watcher_task = None
+
+
+async def watch_expired_auctions():
+	await client.wait_until_ready()
+	while not client.is_closed():
+		try:
+			outcomes = close_expired_auctions()
+			for outcome in outcomes:
+				channel = client.get_channel(int(outcome["channel_id"]))
+				if channel is None:
+					try:
+						channel = await client.fetch_channel(int(outcome["channel_id"]))
+					except discord.DiscordException:
+						continue
+
+				if outcome["status"] == "sold":
+					message = (
+						f"Auction #{outcome['listing_id']} ended — "
+						f"<@{outcome['winner_id']}> won collectible "
+						f"#{outcome['item_id']} for {outcome['amount']} burgas <:burga:1493907112542077092>"
+					)
+				else:
+					message = (
+						f"Auction #{outcome['listing_id']} ended without a winning bid 🙁"
+					)
+				await channel.send(
+					message,
+					allowed_mentions=discord.AllowedMentions.none(),
+				)
+			await asyncio.sleep(30)
+		except Exception as error:
+			print("auction watcher error: %s" % error)
+			await asyncio.sleep(30)
 
 @client.event
 async def on_ready():
+	global auction_watcher_task
+	client.tree.clear_commands(guild=None)
 	client.tree.clear_commands(guild=guild)
-	await client.tree.sync()
+	on_message_handlers.clear()
 
 	for module in modules:
 		load_module(module)
 
+	await client.tree.sync()
 	client.tree.copy_global_to(guild=guild)
 	await client.tree.sync(guild=guild)
+
+	if auction_watcher_task is None or auction_watcher_task.done():
+		auction_watcher_task = asyncio.create_task(watch_expired_auctions())
 
 @client.event
 async def on_message(message):

@@ -9,5 +9,7 @@ __pycache__/
 env.py
 AGENTS.md
 burga.csv
+gamble_stats.csv
+pppbot.sqlite3*
 .env
 graphify-out/
