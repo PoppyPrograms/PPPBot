@@ -3,6 +3,7 @@ import glob
 import logging
 import os
 import sys
+import time
 
 from error_reporting import (
 	ErrorReporter,
@@ -26,6 +27,10 @@ from discord.ext import commands
 
 
 from storage import close_expired_auctions, initialize_database
+from helpers.message_recorder import (
+	MESSAGE_RECORDER_INTERVAL_SECONDS,
+	collect_and_send_recent_messages,
+)
 
 
 initialize_database()
@@ -42,6 +47,15 @@ logger = logging.getLogger("pppbot")
 class PPPBot(commands.Bot):
 	async def setup_hook(self):
 		await error_reporter.start()
+		for module in modules:
+			load_module(module)
+
+		# Sync before the gateway starts dispatching interactions. Rebuilding the
+		# tree in on_ready created a small window where valid commands looked
+		# unknown, especially after reconnects.
+		await self.tree.sync()
+		self.tree.copy_global_to(guild=guild)
+		await self.tree.sync(guild=guild)
 		await super().setup_hook()
 
 	async def close(self):
@@ -53,7 +67,9 @@ guild = discord.Object(id=env.GUILD_ID)
 intents = discord.Intents.all()
 intents.message_content = True
 client = PPPBot(command_prefix="&", intents=intents)
+client.tree.fallback_to_global = True
 auction_watcher_task = None
+message_recorder_task = None
 
 
 async def watch_expired_auctions():
@@ -87,6 +103,30 @@ async def watch_expired_auctions():
 		except Exception as error:
 			print("auction watcher error: %s" % error)
 			await asyncio.sleep(30)
+
+
+async def record_recent_messages():
+	"""Forward a rolling hour of accessible messages once per hour."""
+
+	await client.wait_until_ready()
+	while not client.is_closed():
+		started = time.monotonic()
+		try:
+			result = await collect_and_send_recent_messages(client)
+			logger.debug(
+				"Message recorder batch: %s messages, sent=%s",
+				result["count"],
+				result["sent"],
+			)
+		except asyncio.CancelledError:
+			raise
+		except Exception as error:
+			# A recorder failure must never take down the bot or the hourly loop.
+			logger.debug("Message recorder batch failed: %s", error, exc_info=True)
+
+		remaining = MESSAGE_RECORDER_INTERVAL_SECONDS - (time.monotonic() - started)
+		if remaining > 0:
+			await asyncio.sleep(remaining)
 
 
 def report_discord_error(context, exception, tb=None):
@@ -137,8 +177,11 @@ async def on_app_command_error(interaction, exception):
 	"""Report errors from slash and context-menu commands."""
 
 	command = getattr(interaction, "command", None)
-	command_name = getattr(command, "qualified_name", None) or getattr(
-		command, "name", "unknown"
+	data = getattr(interaction, "data", {}) or {}
+	command_name = (
+		getattr(command, "qualified_name", None)
+		or getattr(command, "name", None)
+		or data.get("name", "unknown")
 	)
 	report_discord_error(
 		f"Application command '{command_name}'",
@@ -153,20 +196,11 @@ client.tree.on_error = on_app_command_error
 
 @client.event
 async def on_ready():
-	global auction_watcher_task
-	client.tree.clear_commands(guild=None)
-	client.tree.clear_commands(guild=guild)
-	on_message_handlers.clear()
-
-	for module in modules:
-		load_module(module)
-
-	await client.tree.sync()
-	client.tree.copy_global_to(guild=guild)
-	await client.tree.sync(guild=guild)
-
+	global auction_watcher_task, message_recorder_task
 	if auction_watcher_task is None or auction_watcher_task.done():
 		auction_watcher_task = asyncio.create_task(watch_expired_auctions())
+	if message_recorder_task is None or message_recorder_task.done():
+		message_recorder_task = asyncio.create_task(record_recent_messages())
 
 @client.event
 async def on_message(message):
