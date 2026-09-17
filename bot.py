@@ -195,7 +195,8 @@ def load_module_descriptor(module, descriptor):
 					description=description,
 					callback=callback,
 					nsfw=nsfw,
-				)
+				),
+				guild=guild
 			)
 			return
 
@@ -206,9 +207,14 @@ def load_module_descriptor(module, descriptor):
 			name = descriptor["name"]
 			callback = descriptor["callback"]
 			nsfw = bool(descriptor["nsfw"]) if "nsfw" in descriptor else False
-			print("registerd /%s" % name)
+			print("registered /%s" % name)
 			client.tree.add_command(
-				app_commands.ContextMenu(name=name, callback=callback, nsfw=nsfw)
+				app_commands.ContextMenu(
+					name=name,
+					callback=callback,
+					nsfw=nsfw,
+				),
+				guild=guild
 			)
 			return
 
