@@ -154,15 +154,12 @@ client.tree.on_error = on_app_command_error
 @client.event
 async def on_ready():
 	global auction_watcher_task
-	client.tree.clear_commands(guild=None)
 	client.tree.clear_commands(guild=guild)
 	on_message_handlers.clear()
 
 	for module in modules:
 		load_module(module)
 
-	await client.tree.sync()
-	client.tree.copy_global_to(guild=guild)
 	await client.tree.sync(guild=guild)
 
 	if auction_watcher_task is None or auction_watcher_task.done():
