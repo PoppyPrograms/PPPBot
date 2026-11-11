@@ -2,7 +2,7 @@
 
 The ONLY official bot for Poppy's Programming Paradise (**PPP**). Please follow the readme!
 
-Link to PPP: https://discord.gg/EGzpccSbb5
+Link to PPP: [https://discord.gg/7jqPVHhCZg]
 
 ## Contributors:
 
