@@ -53,6 +53,16 @@ CREATE TABLE IF NOT EXISTS gamble_stats (
     losses INTEGER NOT NULL DEFAULT 0 CHECK (losses >= 0)
 );
 
+CREATE TABLE IF NOT EXISTS reggies (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id TEXT NOT NULL,
+    roll INTEGER NOT NULL CHECK (roll BETWEEN 250 AND 300),
+    captured_at INTEGER NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS reggies_owner_idx
+    ON reggies (user_id, id);
+
 CREATE TABLE IF NOT EXISTS collectibles (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     guild_id TEXT NOT NULL,
@@ -358,6 +368,34 @@ def write_gamble_stats(stats):
                 """,
                 (str(user_id), int(gains), int(losses)),
             )
+
+
+def capture_reggie(user_id, roll):
+    """Save a successful reggie roll and return the new collection entry."""
+    if not 250 <= roll <= 300:
+        raise ValueError("A saved reggie roll must be between 250 and 300.")
+
+    captured_at = now_timestamp()
+    with database() as connection:
+        _begin_write(connection)
+        cursor = connection.execute(
+            "INSERT INTO reggies (user_id, roll, captured_at) VALUES (?, ?, ?)",
+            (str(user_id), int(roll), captured_at),
+        )
+        row = connection.execute(
+            "SELECT * FROM reggies WHERE id = ?", (cursor.lastrowid,)
+        ).fetchone()
+        return dict(row)
+
+
+def get_reggies(user_id):
+    """Return all reggies owned by a user, newest first."""
+    with database() as connection:
+        rows = connection.execute(
+            "SELECT * FROM reggies WHERE user_id = ? ORDER BY id DESC",
+            (str(user_id),),
+        ).fetchall()
+        return [dict(row) for row in rows]
 
 
 def _item_row(connection, item_id, guild_id=None):
