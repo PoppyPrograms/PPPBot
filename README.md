@@ -19,12 +19,14 @@ What does PPP Bot do?? Good question! I dont know yet 😛
 
 - `/gambleleaderboard` shows each gambler's gains, losses, and net result.
 - `/blackjack` and `/tictactoe` are wagered games with player decisions.
+- Use `/reggie` to roll from 1 to 1000. Rolls from 250 through 300 capture a
+  reggie; `/reggies` shows your collection or another user's collection.
 - Right-click a server message, choose **Apps**, then **Claim message** to
   collect it. Use `/collection` and `/item` to browse collectibles.
 - Use `/give`, `/sell`, `/buy`, `/auction`, `/bid`, `/market`, and
   `/cancel_listing` to trade collectibles.
 
-Balances, gamble statistics, collectibles, listings, bids, and transactions are
-stored in `pppbot.sqlite3` at the project root. Enable Discord's **Message
+Balances, gamble statistics, reggies, collectibles, listings, bids, and
+transactions are stored in `pppbot.sqlite3` at the project root. Enable Discord's **Message
 Content Intent** for the bot in the Developer Portal so claimed messages can
 be snapshotted.
